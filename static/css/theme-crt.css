@@ -1,0 +1,479 @@
+/* ============================================
+   TERMINAL ARCADE — CRT 复古终端主题
+   纯 CSS 实现，零美术资源
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+:root {
+    --bg: #0a0e0a;
+    --bg-light: #0f1a0f;
+    --green: #33ff33;
+    --green-dim: #1a8f1a;
+    --green-bright: #aaffaa;
+    --amber: #ffb000;
+    --text: #c8ffc8;
+    --text-dim: #5a9a5a;
+    --border: #1a4a1a;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', 'Consolas', 'Courier New', monospace;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* CRT 扫描线覆盖层 */
+.crt-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* CRT 屏幕暗角 */
+.screen {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+    position: relative;
+}
+
+/* ---------- 头部 ASCII LOGO ---------- */
+.masthead {
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+}
+
+.ascii-logo pre {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    line-height: 1.1;
+    color: var(--green);
+    text-shadow: 0 0 8px var(--green-dim);
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.prompt-line {
+    margin-top: 10px;
+    color: var(--text-dim);
+}
+
+.user { color: var(--green-bright); }
+.path { color: var(--amber); }
+
+.cmd {
+    color: var(--green);
+    text-decoration: none;
+}
+.cmd:hover {
+    background: var(--green);
+    color: var(--bg);
+}
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: var(--green);
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* ---------- 开机动画文字 ---------- */
+.boot {
+    margin-bottom: 20px;
+    color: var(--text-dim);
+    font-size: 14px;
+}
+.boot-line {
+    opacity: 0;
+    animation: typein 0.3s forwards;
+}
+.boot-line:nth-child(1) { animation-delay: 0.2s; }
+.boot-line:nth-child(2) { animation-delay: 0.6s; }
+
+@keyframes typein {
+    to { opacity: 1; }
+}
+
+/* ---------- 筛选标签栏 ---------- */
+.filter-bar {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-label {
+    color: var(--amber);
+    margin-right: 8px;
+}
+
+.filter-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.1s;
+}
+
+.filter-tag:hover {
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.filter-tag.active {
+    background: var(--green);
+    color: var(--bg);
+    border-color: var(--green);
+    text-shadow: none;
+}
+
+/* ---------- 搜索框 ---------- */
+.search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.search-label { color: var(--amber); }
+
+.search-input {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    color: var(--green);
+    font-family: inherit;
+    font-size: 15px;
+    padding: 6px 12px;
+    flex: 0 1 300px;
+    outline: none;
+}
+.search-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 8px rgba(51, 255, 51, 0.2);
+}
+
+.search-btn {
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: inherit;
+    padding: 6px 16px;
+    cursor: pointer;
+}
+.search-btn:hover {
+    background: var(--green);
+    color: var(--bg);
+}
+
+/* ---------- 板块标题 ---------- */
+.section {
+    margin-bottom: 35px;
+}
+
+.section-title {
+    color: var(--amber);
+    font-size: 18px;
+    margin-bottom: 15px;
+    border-left: 3px solid var(--amber);
+    padding-left: 10px;
+}
+
+/* ---------- 推荐卡片网格 ---------- */
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+.game-card {
+    display: block;
+    border: 1px solid var(--border);
+    padding: 15px;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--bg-light);
+    transition: all 0.1s;
+}
+
+.game-card:hover {
+    border-color: var(--green);
+    background: rgba(51, 255, 51, 0.05);
+    box-shadow: 0 0 12px rgba(51, 255, 51, 0.15);
+}
+
+.card-line {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.card-title {
+    color: var(--green);
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.card-meta {
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--amber);
+}
+
+.card-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.4;
+}
+
+/* ---------- 游戏列表行 ---------- */
+.game-list {
+    border: 1px solid var(--border);
+}
+
+.list-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border);
+}
+.list-row:last-child { border-bottom: none; }
+.list-row:hover {
+    background: rgba(51, 255, 51, 0.05);
+}
+
+.row-num {
+    color: var(--text-dim);
+    font-size: 13px;
+    min-width: 35px;
+}
+
+.row-link {
+    color: var(--green);
+    text-decoration: none;
+    font-size: 17px;
+    flex: 1;
+}
+.row-link:hover {
+    text-decoration: underline;
+}
+
+.row-rating {
+    color: var(--amber);
+    font-size: 14px;
+    min-width: 50px;
+    text-align: right;
+}
+
+.row-age {
+    color: var(--text-dim);
+    font-size: 13px;
+}
+
+.row-cats { display: flex; gap: 6px; }
+
+.cat {
+    display: inline-block;
+    font-size: 12px;
+    padding: 1px 8px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+}
+
+/* ---------- 分页 ---------- */
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pg {
+    display: inline-block;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    text-decoration: none;
+}
+.pg:hover {
+    border-color: var(--green);
+    color: var(--green);
+}
+.pg.active {
+    background: var(--green);
+    color: var(--bg);
+    border-color: var(--green);
+}
+
+/* ---------- 空状态 ---------- */
+.empty {
+    color: var(--text-dim);
+    padding: 30px;
+    text-align: center;
+}
+
+/* ---------- 文本板块 ---------- */
+.text-block p {
+    color: var(--text-dim);
+    margin-bottom: 10px;
+}
+
+.cat-link {
+    color: var(--green);
+    text-decoration: none;
+}
+.cat-link:hover { text-decoration: underline; }
+
+/* ---------- 游戏运行页 ---------- */
+.play-header {
+    margin-bottom: 20px;
+}
+
+.play-title {
+    color: var(--green);
+    font-size: 32px;
+    margin: 10px 0;
+    text-shadow: 0 0 10px var(--green-dim);
+}
+
+.play-meta {
+    color: var(--amber);
+    margin-bottom: 10px;
+}
+
+.play-desc {
+    color: var(--text-dim);
+}
+
+.back-btn {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 8px 20px;
+    border: 1px solid var(--green);
+    color: var(--green);
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 15px;
+    background: transparent;
+    transition: all 0.1s;
+}
+.back-btn:hover {
+    background: var(--green);
+    color: var(--bg);
+    box-shadow: 0 0 12px rgba(51, 255, 51, 0.4);
+}
+
+.game-frame-wrap {
+    border: 2px solid var(--green);
+    box-shadow: 0 0 20px rgba(51, 255, 51, 0.2);
+    background: #000;
+}
+
+.game-frame {
+    display: block;
+    width: 100%;
+    height: 600px;
+    border: none;
+    background: #000;
+}
+
+.play-back {
+    margin-top: 20px;
+}
+
+/* ---------- 底部 ---------- */
+.foot {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 13px;
+    text-align: center;
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 600px) {
+    .ascii-logo pre { font-size: 6px; }
+    .game-frame { height: 400px; }
+    .row-cats { display: none; }
+}
+
+/* ============================================
+   盒子打开动画（CRT 翻盖点亮）
+   ============================================ */
+
+#boot-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 10000;
+    overflow: hidden;
+}
+
+/* 上半块黑面 */
+.boot-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: #000;
+    transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+/* 下半块黑面 */
+.boot-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 50%;
+    background: #000;
+    transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+/* 中间亮线 */
+.boot-line {
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--green);
+    box-shadow: 0 0 20px var(--green), 0 0 40px var(--green);
+    transform: translateY(-50%) scaleX(0);
+    transition: transform 0.3s ease-out;
+}
+.boot-line.on {
+    transform: translateY(-50%) scaleX(1);
+}
+
+/* 打开：上块往上移走，下块往下移走 */
+.boot-top.open {
+    transform: translateY(-100%);
+}
+.boot-bottom.open {
+    transform: translateY(100%);
+}

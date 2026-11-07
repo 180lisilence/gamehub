@@ -1,0 +1,13 @@
+{
+  "id": "notepad_demo",
+  "title": "记事本（EXE 启动测试）",
+  "version": "1.0.0",
+  "type": "exe",
+  "exe": "C:\\Windows\\notepad.exe",
+  "categories": ["测试"],
+  "tags": ["demo", "exe"],
+  "rating": 5.0,
+  "age_rating": "全年龄",
+  "description": "用来验证 EXE 类型游戏的启动链路，点启动会弹出记事本。",
+  "featured": false
+}

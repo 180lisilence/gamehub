@@ -1,0 +1,13 @@
+{
+  "id": "2048",
+  "title": "2048",
+  "version": "1.0.0",
+  "categories": ["休闲", "解谜"],
+  "tags": ["数字", "益智", "单机"],
+  "rating": 4.5,
+  "age_rating": "全年龄",
+  "description": "滑动合并相同数字，挑战合成 2048！",
+  "entry": "index.html",
+  "thumbnail": "",
+  "featured": true
+}

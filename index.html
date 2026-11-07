@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TERMINAL ARCADE 终端街机 · gamehub</title>
+<meta name="description" content="TERMINAL ARCADE 终端街机 —— 基于 FastAPI 的 CRT 复古风网页游戏平台，目录即游戏库，加游戏零平台代码改动。" />
+<style>
+  :root {
+    --bg: #070b07;
+    --bg-soft: #0c140c;
+    --phos: #33ff77;
+    --phos-dim: #1f9c4a;
+    --amber: #ffb347;
+    --line: #16331f;
+    --mono: "Cascadia Code", "JetBrains Mono", "Fira Code", Consolas, "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--phos);
+    font-family: var(--mono);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    text-shadow: 0 0 4px rgba(51, 255, 119, 0.45);
+    letter-spacing: 0.3px;
+  }
+
+  /* CRT 扫描线 + 屏幕曲率暗角 */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0.25) 3px,
+      rgba(0, 0, 0, 0.25) 4px
+    );
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%);
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 48px 22px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* 开机自检块 */
+  .boot {
+    color: var(--phos-dim);
+    font-size: 13px;
+    margin-bottom: 28px;
+    opacity: 0.85;
+  }
+  .boot .ok { color: var(--phos); }
+
+  h1 {
+    font-size: clamp(34px, 7vw, 64px);
+    margin: 0 0 6px;
+    color: var(--phos);
+    text-shadow: 0 0 10px rgba(51, 255, 119, 0.7);
+    letter-spacing: 2px;
+  }
+  .subtitle {
+    color: var(--amber);
+    text-shadow: 0 0 6px rgba(255, 179, 71, 0.5);
+    margin: 0 0 30px;
+    font-size: 15px;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 0.6ch;
+    height: 1em;
+    background: var(--phos);
+    margin-left: 4px;
+    transform: translateY(2px);
+    animation: blink 1s steps(1) infinite;
+    box-shadow: 0 0 8px var(--phos);
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .section {
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--bg-soft), var(--bg));
+    padding: 22px 24px;
+    margin: 26px 0;
+    border-radius: 6px;
+    box-shadow: inset 0 0 30px rgba(22, 51, 31, 0.35);
+  }
+  .section > h2 {
+    margin: 0 0 16px;
+    font-size: 18px;
+    color: var(--phos);
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 10px;
+    letter-spacing: 1px;
+  }
+  .section > h2::before { content: "▌ "; color: var(--amber); }
+
+  p { margin: 10px 0; }
+  a { color: var(--amber); text-decoration: none; border-bottom: 1px dotted var(--amber); }
+  a:hover { background: rgba(255, 179, 71, 0.12); }
+
+  ul { margin: 10px 0; padding-left: 4px; list-style: none; }
+  ul li { padding: 5px 0 5px 22px; position: relative; }
+  ul li::before { content: "»"; position: absolute; left: 0; color: var(--amber); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    border-radius: 5px;
+    background: rgba(12, 20, 12, 0.6);
+  }
+  .card b { color: var(--amber); display: block; margin-bottom: 6px; }
+
+  pre {
+    background: #040804;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--phos-dim);
+    padding: 16px 18px;
+    overflow-x: auto;
+    border-radius: 5px;
+    color: #bdf7cf;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  code { color: var(--amber); }
+
+  .tree { color: #9fe9b8; white-space: pre; font-size: 13px; line-height: 1.55; }
+
+  .badge {
+    display: inline-block;
+    border: 1px solid var(--phos-dim);
+    color: var(--phos);
+    padding: 2px 9px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin: 3px 4px 3px 0;
+  }
+
+  .games { display: flex; flex-wrap: wrap; gap: 12px; }
+  .game {
+    flex: 1 1 150px;
+    border: 1px solid var(--line);
+    padding: 14px;
+    border-radius: 5px;
+    background: rgba(12,20,12,0.6);
+    min-width: 140px;
+  }
+  .game .id { color: var(--amber); font-weight: bold; }
+  .game .desc { color: #9fe9b8; font-size: 13px; margin-top: 6px; }
+
+  footer {
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--line);
+    color: var(--phos-dim);
+    font-size: 13px;
+  }
+  footer a { color: var(--phos); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="boot">
+    BIOS v1.0 ... <span class="ok">OK</span><br />
+    Loading platform kernel ...... <span class="ok">OK</span><br />
+    Mounting <code>/games</code> registry ...... <span class="ok">OK</span><br />
+    Ready.
+  </div>
+
+  <h1 id="title">TERMINAL ARCADE<span class="cursor"></span></h1>
+  <p class="subtitle">终端街机 · 一个 CRT 复古风、即点即玩的网页游戏平台</p>
+
+  <div class="section">
+    <h2>关于本项目</h2>
+    <p>
+      <b style="color:var(--phos)">gamehub</b> 是一个用 <code>Python (FastAPI)</code> 写的网页游戏平台，
+      视觉上采用 <b style="color:var(--amber)">CRT 复古终端 × 街机</b> 风格：
+      扫描线、荧光等宽字体、开机自检动画、打字机标题。游戏卡片像「终端程序条目」，
+      筛选即「输入指令」，进游戏即 <code>RUN &lt;id&gt;</code>，返回即 <code>EXIT</code>。
+    </p>
+    <p>
+      核心理念是 <b style="color:var(--amber)">「目录即游戏库」</b>：平台代码与游戏本体完全解耦。
+      后期加游戏 = 复制一个文件夹 + 写一份 <code>manifest.json</code>，平台代码零改动、自动注册、自动出现在首页/分类/搜索。
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>核心特性</h2>
+    <div class="grid">
+      <div class="card"><b>即点即玩</b>浏览器访问，无需下载安装，HTML5 小游戏秒开。</div>
+      <div class="card"><b>零代码扩展</b>新增游戏只需放文件夹 + 写 manifest，平台自动扫描注册。</div>
+      <div class="card"><b>复古终端 UI</b>CRT 扫描线、荧光绿/琥珀双色、开机自检与打字机动效。</div>
+      <div class="card"><b>筛选 / 搜索 / 分页</b>分类、标签、关键字检索，服务端分页，推荐位（featured）。</div>
+      <div class="card"><b>热重载</b>加完游戏访问 <code>/reload</code> 即可生效，无需重启服务。</div>
+      <div class="card"><b>多形态游戏</b>HTML5 网页游戏 + 本地 exe 拉起（<code>/launch</code>）。</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>技术栈</h2>
+    <p>
+      <span class="badge">FastAPI</span>
+      <span class="badge">Jinja2</span>
+      <span class="badge">SQLite</span>
+      <span class="badge">原生 HTML/CSS/JS</span>
+      <span class="badge">PyInstaller</span>
+      <span class="badge">uvicorn</span>
+    </p>
+    <p style="color:var(--phos-dim)">
+      平台层用 Python 负责路由、扫描、筛选、热度统计；游戏本体为 HTML5 单文件小游戏（JS），
+      由 Python 统一挂载在 <code>/games</code> 下。也可通过 <code>/launch</code> 拉起同目录的本地 exe。
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>快速开始</h2>
+    <pre><code># 1. 安装依赖
+pip install -r requirements.txt
+
+# 2. 启动服务（开发模式）
+python app.py
+#   或：python main.py   （带开机动画的窗口形态）
+
+# 3. 浏览器打开
+#   http://127.0.0.1:8000
+
+# 加完新游戏后，热重载（无需重启）：
+#   http://127.0.0.1:8000/reload</code></pre>
+  </div>
+
+  <div class="section">
+    <h2>项目结构</h2>
+    <pre class="tree">gamehub/
+├── app.py                 # FastAPI 入口：启动即扫描 games/，渲染首页
+├── main.py                # 带开机动画的窗口形态入口
+├── desktop.py             # 桌面启动器（.bat 调用）
+├── native_app.py          # 原生窗口外壳
+├── game_window.py         # 游戏窗口
+├── core/
+│   ├── scanner.py         # 扫描 games/，解析 manifest.json
+│   └── registry.py        # 游戏注册表（内存索引 + SQLite 持久化）
+├── templates/             # Jinja2 模板（CRT 外壳 / 首页 / 游戏运行页）
+│   ├── base.html
+│   ├── index.html
+│   └── game.html
+├── static/
+│   ├── css/theme-crt.css  # 终端风主题（可整体替换）
+│   └── img/icon.png
+├── games/                 # ★ 游戏库：后期加游戏只动这里
+│   ├── 2048/
+│   ├── snake/
+│   └── notepad_demo/
+├── data/                  # SQLite 与统计
+└── requirements.txt</pre>
+  </div>
+
+  <div class="section">
+    <h2>预置游戏库</h2>
+    <div class="games">
+      <div class="game"><div class="id">2048</div><div class="desc">滑动合并数字，挑战 2048。</div></div>
+      <div class="game"><div class="id">snake</div><div class="desc">经典贪吃蛇，方向键操控。</div></div>
+      <div class="game"><div class="id">notepad_demo</div><div class="desc">演示型应用，展示非游戏类条目的接入。</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>如何添加一款新游戏</h2>
+    <p>在 <code>games/</code> 下新建 <code>&lt;game_id&gt;/</code>，放入游戏本体 <code>index.html</code>（可带自己的 js/css）和缩略图，再写一份 <code>manifest.json</code>：</p>
+    <pre><code>{
+  "id": "2048",
+  "title": "2048",
+  "version": "1.0.0",
+  "categories": ["休闲", "解谜"],
+  "tags": ["数字", "益智", "单机"],
+  "rating": 4.5,
+  "description": "滑动合并数字，挑战 2048。",
+  "entry": "index.html",
+  "thumbnail": "thumb.png",
+  "featured": true
+}</code></pre>
+    <p>保存后访问 <code>/reload</code> → 平台自动扫描注册 → 该游戏立即出现在首页、分类、搜索、标签中，平台代码零改动。</p>
+  </div>
+
+  <div class="section">
+    <h2>源码与许可</h2>
+    <p>
+      仓库：<a href="https://github.com/180lisilence/gamehub" target="_blank" rel="noopener">github.com/180lisilence/gamehub</a><br />
+      示例游戏均为自制或采用开源协议素材，可自由学习、二次开发与部署。
+    </p>
+  </div>
+
+  <footer>
+    &gt; TERMINAL ARCADE // gamehub &nbsp;·&nbsp; Built with Python + FastAPI &nbsp;·&nbsp;
+    <a href="https://github.com/180lisilence/gamehub" target="_blank" rel="noopener">GitHub</a>
+    <br />
+    <span style="color:var(--phos-dim)">本页为项目介绍页，亦可作为 GitHub Pages 站点。</span>
+  </footer>
+
+</div>
+
+<script>
+  // 标题打字机效果
+  (function () {
+    var el = document.getElementById("title");
+    var full = "TERMINAL ARCADE";
+    var cursor = el.querySelector(".cursor");
+    el.textContent = "";
+    el.appendChild(cursor);
+    var i = 0;
+    function tick() {
+      if (i <= full.length) {
+        el.insertBefore(document.createTextNode(full.slice(i - 1, i)), cursor);
+        i++;
+        setTimeout(tick, 90);
+      }
+    }
+    setTimeout(tick, 600);
+  })();
+</script>
+</body>
+</html>

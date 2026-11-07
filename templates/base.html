@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ platform_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/theme-crt.css">
+    <link rel="icon" href="/static/img/icon.png">
+</head>
+<body>
+    <!-- 盒子打开动画 -->
+    <div id="boot-screen">
+        <div class="boot-top"></div>
+        <div class="boot-bottom"></div>
+        <div class="boot-line"></div>
+    </div>
+
+    <div class="crt-overlay"></div>
+    <div class="screen" id="main-screen">
+        <header class="masthead">
+            <div class="ascii-logo">
+<pre>
+███████╗███████╗██████╗ ███╗   ███╗
+██╔════╝██╔════╝██╔══██╗████╗ ████║
+█████╗  █████╗  ██████╔╝██╔████╔██║
+██╔══╝  ██╔══╝  ██╔══██╗██║╚██╔╝██║
+██║     ███████╗██║  ██║██║ ╚═╝ ██║
+╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝
+</pre>
+            </div>
+            <p class="prompt-line">
+                <span class="user">root@terminal</span>:<span class="path">~/arcade</span>$
+                <a href="/" class="cmd">cd /</a>
+                <span class="cursor">_</span>
+            </p>
+        </header>
+
+        <main>
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="foot">
+            <p>-- {{ platform_name }} v0.1 · 输入 RUN &lt;游戏名&gt; 开始游戏 · EOF --</p>
+        </footer>
+    </div>
+
+<script>
+// ---- 盒子打开动画（仅首次启动播放） ----
+(function(){
+    const boot = document.getElementById("boot-screen");
+    const main = document.getElementById("main-screen");
+
+    // 已经播过动画了，直接显示主界面，不重复播放
+    if (sessionStorage.getItem("bootPlayed")) {
+        boot.remove();
+        main.style.opacity = "1";
+        return;
+    }
+
+    sessionStorage.setItem("bootPlayed", "1");
+
+    const top = boot.querySelector(".boot-top");
+    const bottom = boot.querySelector(".boot-bottom");
+    const line = boot.querySelector(".boot-line");
+
+    // 初始：主界面透明
+    main.style.opacity = "0";
+
+    // 阶段1：中间亮线出现（0.3s）
+    setTimeout(() => {
+        line.classList.add("on");
+    }, 300);
+
+    // 阶段2：上下两半向外侧滑开（盒子翻盖）
+    setTimeout(() => {
+        top.classList.add("open");
+        bottom.classList.add("open");
+    }, 900);
+
+    // 阶段3：主界面淡入
+    setTimeout(() => {
+        main.style.transition = "opacity 0.4s";
+        main.style.opacity = "1";
+    }, 1500);
+
+    // 阶段4：动画层淡出移除
+    setTimeout(() => {
+        boot.style.transition = "opacity 0.3s";
+        boot.style.opacity = "0";
+        setTimeout(() => boot.remove(), 300);
+    }, 2000);
+})();
+</script>
+</body>
+</html>

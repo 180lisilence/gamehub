@@ -1,0 +1,28 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# ---- Virtual env ----
+.venv/
+venv/
+env/
+
+# ---- Build artifacts (PyInstaller) ----
+build/
+dist/
+*.spec.bak
+
+# ---- Databases (generated) ----
+*.db
+*.sqlite3
+*.sqlite
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*.swp
+
+# ---- WorkBuddy ----
+.workbuddy/

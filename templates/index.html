@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ platform_name }} — 免费在线终端游戏{% endblock %}
+
+{% block content %}
+<section class="boot">
+    <p class="boot-line">$ INITIALIZING TERMINAL ARCADE ... OK</p>
+    <p class="boot-line">$ LOADING {{ total }} GAMES ... OK</p>
+</section>
+
+<!-- 筛选标签栏 -->
+<nav class="filter-bar">
+    <span class="filter-label">[FILTER]</span>
+    <a href="/" class="filter-tag {% if not current_category and not current_tag %}active{% endif %}">
+        ALL ({{ total }})
+    </a>
+    {% for c in categories %}
+    <a href="/?category={{ c }}" class="filter-tag {% if current_category == c %}active{% endif %}">
+        {{ c }}
+    </a>
+    {% endfor %}
+</nav>
+
+<!-- 搜索 -->
+<form class="search-form" action="/" method="get">
+    <label class="search-label">$ SEARCH:</label>
+    <input type="text" name="q" value="{{ current_q or '' }}" placeholder="输入游戏名..." class="search-input">
+    <button type="submit" class="search-btn">RUN</button>
+</form>
+
+<!-- 推荐位 -->
+{% if featured_games %}
+<section class="section">
+    <h2 class="section-title">// FEATURED — 推荐游戏</h2>
+    <div class="game-grid">
+        {% for g in featured_games %}
+        <a href="/play/{{ g.id }}" class="game-card featured">
+            <div class="card-line">$ RUN {{ g.id }}</div>
+            <div class="card-title">{{ g.title }}</div>
+            <div class="card-meta">
+                <span class="rating">★ {{ g.rating }}</span>
+                <span class="age">[{{ g.age_rating }}]</span>
+            </div>
+            <div class="card-desc">{{ g.description }}</div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- 全部游戏列表 -->
+<section class="section">
+    <h2 class="section-title">
+        // GAME LIST
+        {% if current_category %} — CATEGORY: {{ current_category }}{% endif %}
+        {% if current_tag %} — TAG: {{ current_tag }}{% endif %}
+        {% if current_q %} — SEARCH: "{{ current_q }}"{% endif %}
+    </h2>
+
+    {% if games %}
+    <div class="game-list">
+        {% for g in games %}
+        <div class="list-row">
+            <span class="row-num">[{{ "%02d"|format(loop.index + (page-1)*12) }}]</span>
+            <a href="/play/{{ g.id }}" class="row-link">{{ g.title }}{% if g.type == "exe" %} <span style="color:#ffb000;">[EXE]</span>{% endif %}</a>
+            <span class="row-rating">★ {{ g.rating }}</span>
+            <span class="row-age">[{{ g.age_rating }}]</span>
+            <span class="row-cats">
+                {% for c in g.categories %}<span class="cat">{{ c }}</span>{% endfor %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- 分页 -->
+    {% if total_pages > 1 %}
+    <nav class="pagination">
+        {% if page > 1 %}
+        <a href="/?page={{ page - 1 }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_q %}&q={{ current_q }}{% endif %}" class="pg">PREV</a>
+        {% endif %}
+        {% for p in range(1, total_pages + 1) %}
+        <a href="/?page={{ p }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_q %}&q={{ current_q }}{% endif %}"
+           class="pg {% if p == page %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+        {% if page < total_pages %}
+        <a href="/?page={{ page + 1 }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_q %}&q={{ current_q }}{% endif %}" class="pg">NEXT</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+    <p class="empty">-- NO GAMES FOUND. TRY ANOTHER FILTER. --</p>
+    {% endif %}
+</section>
+
+<!-- 内容板块 -->
+<section class="section text-block">
+    <h2 class="section-title">// ABOUT TERMINAL ARCADE</h2>
+    <p>
+        TERMINAL ARCADE 是一个纯浏览器终端风格游戏平台。
+        所有游戏点开即玩，无需下载、无需注册。
+        支持电脑、平板、手机。每周上新。
+    </p>
+</section>
+
+<section class="section text-block">
+    <h2 class="section-title">// CATEGORIES</h2>
+    <p>
+        {% for c in categories %}
+        <a href="/?category={{ c }}" class="cat-link">{{ c }}</a>{% if not loop.last %} · {% endif %}
+        {% endfor %}
+    </p>
+</section>
+{% endblock %}

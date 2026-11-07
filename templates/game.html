@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}RUN {{ game.id }} — {{ game.title }} | {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="play-header">
+    <p class="prompt-line">
+        <span class="user">root@terminal</span>:<span class="path">~/arcade</span>$
+        <span class="cmd">RUN {{ game.id }}</span>
+    </p>
+    <h1 class="play-title">{{ game.title }}</h1>
+    <p class="play-meta">
+        <span class="rating">★ {{ game.rating }}</span>
+        <span class="age">[{{ game.age_rating }}]</span>
+        {% if game.type == "exe" %}<span class="cat">[EXE 本地程序]</span>{% endif %}
+        {% for c in game.categories %}<span class="cat">{{ c }}</span>{% endfor %}
+    </p>
+    <p class="play-desc">{{ game.description }}</p>
+    <a href="/" class="back-btn">← EXIT / 返回列表</a>
+</div>
+
+{% if game.type == "exe" %}
+<div class="game-frame-wrap" style="display:flex;align-items:center;justify-content:center;min-height:420px;">
+    <div style="text-align:center;">
+        <p style="color:#33ff33;font-family:monospace;margin-bottom:18px;">
+            $ 这是一个本地 EXE 游戏，点击下方按钮启动
+        </p>
+        <button id="launch-btn" onclick="launchGame()"
+                style="background:transparent;color:#33ff33;border:2px solid #33ff33;
+                       padding:14px 42px;font-family:monospace;font-size:18px;cursor:pointer;">
+            ▶ 启动游戏 {{ game.title }}
+        </button>
+        <p id="launch-result" style="color:#ffb000;font-family:monospace;margin-top:16px;min-height:24px;"></p>
+        {% if not game.has_exe %}
+        <p style="color:#ff5555;font-family:monospace;margin-top:10px;">
+            !! 警告：manifest 里写的 exe 文件不存在，请检查路径 !!
+        </p>
+        {% endif %}
+    </div>
+</div>
+<script>
+async function launchGame() {
+    const btn = document.getElementById('launch-btn');
+    const out = document.getElementById('launch-result');
+    btn.disabled = true;
+    out.textContent = '$ 正在启动...';
+    try {
+        const r = await fetch('/launch/{{ game.id }}');
+        const j = await r.json();
+        if (r.ok) {
+            out.textContent = '$ OK 已启动：' + j.launched;
+        } else {
+            out.textContent = '$ 启动失败：' + (j.detail || r.status);
+        }
+    } catch (e) {
+        out.textContent = '$ 请求出错：' + e;
+    } finally {
+        btn.disabled = false;
+    }
+}
+</script>
+{% else %}
+<div class="game-frame-wrap">
+    <iframe src="{{ game_url }}" class="game-frame" allowfullscreen></iframe>
+</div>
+{% endif %}
+
+<p class="play-back">
+    <a href="/" class="cmd">← EXIT / 返回列表</a>
+</p>
+{% endblock %}

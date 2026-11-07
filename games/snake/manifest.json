@@ -1,0 +1,13 @@
+{
+  "id": "snake",
+  "title": "贪吃蛇",
+  "version": "1.0.0",
+  "categories": ["休闲", "街机"],
+  "tags": ["经典", "反应", "单机"],
+  "rating": 4.3,
+  "age_rating": "全年龄",
+  "description": "方向键控制蛇身吃食物，越吃越长，别撞墙别咬自己。",
+  "entry": "index.html",
+  "thumbnail": "",
+  "featured": true
+}
